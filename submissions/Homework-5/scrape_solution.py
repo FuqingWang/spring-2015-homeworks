@@ -147,14 +147,13 @@ def parse_hotellist_page(html, page_count):
         headers = { 'User-Agent' : user_agent }
         response = requests.get(url, headers=headers)
         new_html = response.text.encode('utf-8')
-
-        row_i = helper(new_html)
-        row_i.insert(0, float(num_reviews1.strip("reviews").replace(",", "")))
-        row_i.insert(0, float(star))
-        data.append(row_i)
-
-    with open("hotels.csv", "a+") as f:
-        csv.writer(f).writerows(data)
+        
+        row = helper(new_html)
+        row.insert(0, float(num_reviews1.strip("reviews").replace(",", "")))
+        row.insert(0, float(star))
+        data.append(row)
+    with open("hotels.csv", "a+") as file:
+        csv.writer(file).writerows(data)
 
     # Get next URL page if exists, otherwise exit
     div = soup.find("div", {"id" : "pager_bottom"})
@@ -172,7 +171,6 @@ def parse_hotellist_page(html, page_count):
             return href['href']
 
 def helper(html):
-
     soup = BeautifulSoup(html)
     # Extract hotel detailed review box
     review_boxes = soup.find('div', {'class' : 'content wrap trip_type_layout'})
@@ -180,10 +178,8 @@ def helper(html):
     if review_boxes is None:
         log.info("No detailed reviews available.")
         sys.exit()
-
-        
+# create an empty list to store data later
     x = []
-
     rating_box = soup.find('div', {'class' : 'col2of2 composite'})
     rating_list = rating_box.findAll('div', {'class' : 'wrap row'})
     log.info("Traveler Rating ------>")
@@ -192,7 +188,6 @@ def helper(html):
         num_reviews = li.find("span", {'class': "compositeCount"}).find(text=True)
         x.append(float(num_reviews.replace(",", "")))
         log.info("%s: %s" % (level.strip(), num_reviews.strip()))
-
 
     type_list = review_boxes.findAll('div', {'class' : 'filter_connection_wrapper'})
     log.info("Review for Travel Type ------>")
@@ -213,7 +208,6 @@ def helper(html):
         star = stars['alt'].split()[0]
         ret.append(float(star))
         log.info("%s: %s stars" % (summary_name.strip(), star))
-
     return x
 
 
